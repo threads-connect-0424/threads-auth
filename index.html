@@ -1,1 +1,267 @@
-<html><body><h1>Auth OK</h1></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PROJECT ORION 0.3｜楽天実商品検索</title>
+<style>
+:root{--navy:#14213d;--orange:#fca311;--bg:#f4f7fb;--line:#d9e1ee;--muted:#667085;--green:#137333;--red:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Yu Gothic UI","Meiryo",sans-serif;background:var(--bg);color:#1f2937}
+header{background:var(--navy);color:#fff;padding:20px 24px}
+header h1{margin:0;font-size:23px}
+header p{margin:6px 0 0;opacity:.78;font-size:13px}
+main{max-width:1200px;margin:22px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 4px 14px rgba(20,33,61,.05)}
+h2{margin:0 0 14px;font-size:19px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:12px;font-weight:800;margin-bottom:5px}
+input,select{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;font-size:14px;background:#fff}
+button{border:0;border-radius:9px;padding:11px 16px;font-weight:800;cursor:pointer}
+.primary{background:var(--orange);color:var(--navy)}
+.secondary{background:#e9eef7;color:var(--navy)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.note{font-size:12px;color:var(--muted);line-height:1.65}
+.status{padding:11px 13px;border-radius:9px;background:#eef2f7;font-size:13px;margin-top:12px}
+.status.ok{background:#e7f6ec;color:var(--green)}
+.status.error{background:#feeceb;color:var(--red)}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.item{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;display:flex;flex-direction:column}
+.image{height:180px;background:#f8fafc;display:flex;align-items:center;justify-content:center}
+.image img{max-width:100%;max-height:100%;object-fit:contain}
+.body{padding:14px;display:flex;flex-direction:column;flex:1}
+.source{font-size:11px;font-weight:900;color:#bf4b00}
+.item h3{font-size:14px;line-height:1.55;margin:7px 0}
+.price{font-size:22px;font-weight:900;margin:5px 0}
+.meta{font-size:12px;color:var(--muted);line-height:1.65}
+.open{display:block;text-align:center;text-decoration:none;background:#e9eef7;color:var(--navy);padding:10px;border-radius:8px;font-weight:800;margin-top:auto}
+.count{font-weight:800}
+.secret{font-family:monospace}
+@media(max-width:900px){.grid,.products{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid,.grid2,.products{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>PROJECT ORION 0.3</h1>
+<p>楽天市場の実商品を条件検索する試作版</p>
+</header>
+
+<main>
+<section class="card">
+<h2>① 楽天APIを接続</h2>
+<div class="grid2">
+<div>
+<label>Application ID</label>
+<input id="appId" class="secret" autocomplete="off" placeholder="楽天で発行されたApplication ID">
+</div>
+<div>
+<label>Access Key</label>
+<input id="accessKey" class="secret" type="password" autocomplete="off" placeholder="楽天で発行されたAccess Key">
+</div>
+</div>
+<div class="actions">
+<button class="secondary" onclick="toggleKey()">Access Keyを表示／非表示</button>
+<button class="secondary" onclick="clearKeys()">入力を消す</button>
+</div>
+<p class="note">ID・キーはこのページのファイルには保存されません。ページを閉じると入力内容は消えます。このチャットやGitHubのコードには貼り付けないでください。</p>
+</section>
+
+<section class="card">
+<h2>② 仕入れ候補を検索</h2>
+<div class="grid">
+<div>
+<label>ジャンル</label>
+<select id="category">
+<option value="美容家電">美容家電</option>
+<option value="ヘアドライヤー">ヘアドライヤー</option>
+<option value="ヘアアイロン">ヘアアイロン</option>
+<option value="美顔器">美顔器</option>
+<option value="玩具">玩具・ホビー</option>
+<option value="季節家電">季節性商品</option>
+<option value="日用品">日用品</option>
+</select>
+</div>
+<div>
+<label>追加キーワード</label>
+<input id="keyword" placeholder="例：パナソニック">
+</div>
+<div>
+<label>最低価格</label>
+<input id="minPrice" type="number" value="3000" min="0">
+</div>
+<div>
+<label>最高価格</label>
+<input id="maxPrice" type="number" value="30000" min="0">
+</div>
+</div>
+<div class="grid" style="margin-top:12px">
+<div>
+<label>表示件数</label>
+<select id="hits"><option>10</option><option selected>20</option><option>30</option></select>
+</div>
+<div>
+<label>並び順</label>
+<select id="sort">
+<option value="standard">楽天標準</option>
+<option value="+itemPrice">価格が安い順</option>
+<option value="-itemPrice">価格が高い順</option>
+<option value="-reviewCount">レビュー件数順</option>
+<option value="-reviewAverage">レビュー評価順</option>
+</select>
+</div>
+</div>
+<div class="actions">
+<button class="primary" onclick="searchRakuten()">楽天の実商品を検索</button>
+</div>
+<div id="status" class="status">Application IDとAccess Keyを入力して検索してください。</div>
+</section>
+
+<section class="card">
+<h2>検索結果 <span id="resultCount" class="count"></span></h2>
+<p class="note">表示価格は楽天の商品価格です。送料、クーポン、ポイント条件は商品ページで最終確認してください。</p>
+<div id="results" class="products"></div>
+</section>
+</main>
+
+<script>
+let activeCallback = null;
+let timeoutId = null;
+
+function yen(n){
+  return new Intl.NumberFormat("ja-JP",{style:"currency",currency:"JPY",maximumFractionDigits:0}).format(Number(n||0));
+}
+function esc(s){
+  return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+function setStatus(message,type=""){
+  const el=document.getElementById("status");
+  el.textContent=message;
+  el.className="status "+type;
+}
+function toggleKey(){
+  const el=document.getElementById("accessKey");
+  el.type=el.type==="password"?"text":"password";
+}
+function clearKeys(){
+  document.getElementById("appId").value="";
+  document.getElementById("accessKey").value="";
+  setStatus("IDとキーの入力を消しました。");
+}
+function cleanPrevious(){
+  if(activeCallback){
+    try{delete window[activeCallback]}catch(e){}
+    activeCallback=null;
+  }
+  if(timeoutId){clearTimeout(timeoutId);timeoutId=null}
+  document.querySelectorAll("script[data-orion-jsonp]").forEach(x=>x.remove());
+}
+function searchRakuten(){
+  cleanPrevious();
+
+  const appId=document.getElementById("appId").value.trim();
+  const accessKey=document.getElementById("accessKey").value.trim();
+  const category=document.getElementById("category").value.trim();
+  const extra=document.getElementById("keyword").value.trim();
+  const keyword=[category,extra].filter(Boolean).join(" ");
+  const minPrice=Number(document.getElementById("minPrice").value||0);
+  const maxPrice=Number(document.getElementById("maxPrice").value||0);
+  const hits=Number(document.getElementById("hits").value||20);
+  const sort=document.getElementById("sort").value;
+
+  if(!appId||!accessKey){
+    setStatus("Application IDとAccess Keyを両方入力してください。","error");
+    return;
+  }
+  if(!keyword){
+    setStatus("検索キーワードを入力してください。","error");
+    return;
+  }
+  if(maxPrice && minPrice>maxPrice){
+    setStatus("最低価格が最高価格を超えています。","error");
+    return;
+  }
+
+  setStatus("楽天市場を検索しています…");
+  document.getElementById("results").innerHTML="";
+  document.getElementById("resultCount").textContent="";
+
+  const callback="orionRakuten_"+Date.now();
+  activeCallback=callback;
+
+  window[callback]=function(data){
+    cleanPrevious();
+    if(data && data.error){
+      setStatus("楽天APIエラー："+(data.error_description||data.error),"error");
+      return;
+    }
+    const raw=(data && (data.Items||data.items))||[];
+    const items=raw.map(x=>x.Item||x.item||x);
+    render(items);
+    setStatus("楽天市場の実商品を取得しました。","ok");
+  };
+
+  const url=new URL("https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701");
+  url.searchParams.set("applicationId",appId);
+  url.searchParams.set("accessKey",accessKey);
+  url.searchParams.set("format","json");
+  url.searchParams.set("formatVersion","2");
+  url.searchParams.set("callback",callback);
+  url.searchParams.set("keyword",keyword);
+  url.searchParams.set("hits",String(Math.min(30,hits)));
+  url.searchParams.set("sort",sort);
+  if(minPrice>0) url.searchParams.set("minPrice",String(minPrice));
+  if(maxPrice>0) url.searchParams.set("maxPrice",String(maxPrice));
+  url.searchParams.set("imageFlag","1");
+  url.searchParams.set("availability","1");
+
+  const script=document.createElement("script");
+  script.src=url.toString();
+  script.dataset.orionJsonp="1";
+  script.onerror=function(){
+    cleanPrevious();
+    setStatus("接続できませんでした。ID・Access Key・許可ドメインを確認してください。","error");
+  };
+  document.body.appendChild(script);
+
+  timeoutId=setTimeout(()=>{
+    cleanPrevious();
+    setStatus("検索がタイムアウトしました。ID・Access Key・楽天側の許可ドメインを確認してください。","error");
+  },20000);
+}
+
+function render(items){
+  document.getElementById("resultCount").textContent=`（${items.length}件）`;
+  const box=document.getElementById("results");
+  if(!items.length){
+    box.innerHTML='<div class="card">条件に合う商品が見つかりませんでした。</div>';
+    return;
+  }
+
+  box.innerHTML=items.map(i=>{
+    const imgs=i.mediumImageUrls||i.smallImageUrls||[];
+    const img=typeof imgs[0]==="string"?imgs[0]:(imgs[0]&&imgs[0].imageUrl)||"";
+    const price=i.itemPrice||0;
+    const postage=i.postageFlag===0?"送料込み／条件確認":"送料別の可能性あり";
+    const review=(i.reviewAverage||0)?`${i.reviewAverage}（${i.reviewCount||0}件）`:"レビュー情報なし";
+    return `
+    <article class="item">
+      <div class="image">${img?`<img loading="lazy" src="${esc(img)}" alt="">`:"画像なし"}</div>
+      <div class="body">
+        <div class="source">楽天市場</div>
+        <h3>${esc(i.itemName||"商品名なし")}</h3>
+        <div class="price">${yen(price)}</div>
+        <div class="meta">
+          店舗：${esc(i.shopName||"-")}<br>
+          レビュー：${esc(review)}<br>
+          送料：${esc(postage)}
+        </div>
+        <a class="open" href="${esc(i.itemUrl||"#")}" target="_blank" rel="noopener noreferrer">楽天の商品ページを開く</a>
+      </div>
+    </article>`;
+  }).join("");
+}
+</script>
+</body>
+</html>
