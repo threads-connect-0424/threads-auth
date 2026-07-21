@@ -1,34 +1,32 @@
-PROJECT ORION 0.3 GitHubアップロード手順
+PROJECT ORION 0.3
+楽天市場の実商品を条件検索する試作版
 
-今回アップロードする場所
-threads-auth リポジトリの中に「orion」という新しいフォルダを作り、
-その中へ index.html を入れます。
+① 楽天APIを接続
+Application ID
+楽天で発行されたApplication ID
+Access Key
+楽天で発行されたAccess Key
+Access Keyを表示／非表示
+入力を消す
+ID・キーはこのページのファイルには保存されません。ページを閉じると入力内容は消えます。このチャットやGitHubのコードには貼り付けないでください。
 
-公開後の予定URL
-https://threads-connect-0424.github.io/threads-auth/orion/
+② 仕入れ候補を検索
+ジャンル
 
-重要
-・現在のThreads用 index.html は削除・上書きしません。
-・楽天Application IDとAccess KeyはGitHubへ書き込みません。
-・ORION画面を開いたときだけ、自分で入力します。
+美容家電
+追加キーワード
+例：パナソニック
+最低価格
+3000
+最高価格
+30000
+表示件数
 
-GitHubでの操作
-1. threads-authリポジトリを開く
-2. 「ファイル追加」を押す
-3. 「新しいファイルを作成」を押す
-4. ファイル名欄に orion/index.html と入力
-5. このZIP内の orion/index.html をメモ帳で開き、全文コピー
-6. GitHubの編集欄へ貼り付け
-7. 画面下の「変更をコミット」を押す
-8. 数分待つ
-9. 次のURLを開く
-   https://threads-connect-0424.github.io/threads-auth/orion/
+20
+並び順
 
-ORION画面の操作
-1. 楽天Application IDを入力
-2. 楽天Access Keyを入力
-3. ジャンル・価格帯を選択
-4. 「楽天の実商品を検索」を押す
-
-キーはこのチャットへ貼らないでください。
-
+楽天標準
+楽天の実商品を検索
+Application IDとAccess Keyを入力して検索してください。
+検索結果
+表示価格は楽天の商品価格です。送料、クーポン、ポイント条件は商品ページで最終確認してください。
